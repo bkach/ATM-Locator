@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="numberOfMeters">
+        <item quantity="one">%d Meter Away</item>
+        <item quantity="other">%d Meters Away</item>
+    </plurals>
+</resources>

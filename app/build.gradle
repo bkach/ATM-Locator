@@ -80,4 +80,10 @@ dependencies {
 
     // location
     implementation 'com.google.android.gms:play-services-location:16.0.0'
+
+    // RxKotlin
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.3.0'
+
+    // RxAndroid
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
 }
