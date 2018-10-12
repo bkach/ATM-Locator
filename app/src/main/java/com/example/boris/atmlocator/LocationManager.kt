@@ -26,7 +26,7 @@ class LocationManager {
     val lastKnownLocation : MutableLiveData<Location?> = MutableLiveData()
     lateinit var lastKnownLocationObserver: Observer<Location?>
     var calculateDistancesDisposable: Disposable? = null
-    val distanceCalculationLocation : Location = Location("")
+    private val distanceCalculationLocation : Location = Location("")
 
     companion object {
         const val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
@@ -84,38 +84,41 @@ class LocationManager {
         }
     }
 
-    fun calculateDistances(atms: List<Atm>?, onDistancesCalculated: (Boolean) -> Unit) {
+    fun calculateDistances(atms: List<Atm>?, onDistancesCalculated: (List<Atm>?) -> Unit) {
         if (lastKnownLocation.value != null) {
             calculateDistanceInBackground(atms, onDistancesCalculated)
         } else {
-            onDistancesCalculated(false)
+            onDistancesCalculated(atms)
             observeLocationChange(atms, onDistancesCalculated)
         }
     }
 
-    private fun observeLocationChange(atms: List<Atm>?, onDistancesCalculated: (Boolean) -> Unit) {
-        lastKnownLocationObserver = Observer { _ ->
-            calculateDistanceInBackground(atms) {
-                lastKnownLocation.removeObserver(lastKnownLocationObserver)
-                onDistancesCalculated(true)
+    private fun observeLocationChange(atms: List<Atm>?, onDistancesCalculated: (List<Atm>?) -> Unit) {
+        lastKnownLocationObserver = Observer { location ->
+            if (location != null) {
+                calculateDistanceInBackground(atms) {
+                    lastKnownLocation.removeObserver(lastKnownLocationObserver)
+                    onDistancesCalculated(atms)
+                }
             }
         }
         lastKnownLocation.observeForever(lastKnownLocationObserver)
     }
 
-    private fun calculateDistanceInBackground(atms: List<Atm>?, onDistancesCalculated: (Boolean) -> Unit) {
+    private fun calculateDistanceInBackground(atms: List<Atm>?, onDistancesCalculated: (List<Atm>?) -> Unit) {
         calculateDistancesDisposable = Observable.just(atms)
                         .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnNext {
-                            it?.forEach {
+                            it?.map {
                                 distanceCalculationLocation.latitude = it.latitude
                                 distanceCalculationLocation.longitude = it.longitude
                                 it.distance = lastKnownLocation.value?.distanceTo(distanceCalculationLocation)
+                                it
                             }
                         }
                         .subscribe {
-                            onDistancesCalculated(lastKnownLocation.value != null)
+                            onDistancesCalculated(it)
                         }
     }
 

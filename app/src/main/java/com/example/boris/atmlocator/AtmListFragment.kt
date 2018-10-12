@@ -25,7 +25,7 @@ class AtmListFragment : Fragment() {
         setupRecyclerView()
 
         val atmViewModel = ViewModelProviders.of(activity!!).get(AtmViewModel::class.java)
-        atmViewModel.atmsLiveData.observe(this, Observer { atmListAdapter?.updateAtms(it) })
+        atmViewModel.atmsFinalLiveData.observe(this, Observer { atmListAdapter?.updateAtms(it) })
 
         atmListAdapter?.onClickCallback?.observe(this, Observer { atm ->
             atmViewModel.onAtmSelected(atm)

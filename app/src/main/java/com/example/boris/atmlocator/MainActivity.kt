@@ -31,11 +31,6 @@ class MainActivity : AppCompatActivity() {
         restoreInstanceState(savedInstanceState)
     }
 
-    override fun onDestroy() {
-        locationManager.onDestroy()
-        super.onDestroy()
-    }
-
     private fun initView() {
         locationManager.init(this)
         mapManager.init(this) {
@@ -43,15 +38,10 @@ class MainActivity : AppCompatActivity() {
                 mapManager.updateMapLocationUI(locationManager.locationPermissionGranted)
             }
             moveCameraToInitialPosition()
-            observeViewModelAtmData()
+            observeRawViewModelAtmData()
+            observeFinalViewModelAtmData()
             observeViewModelSelectedAtm()
         }
-    }
-
-    private fun observeViewModelSelectedAtm() {
-        atmViewModel.atmSelectedLiveData.observe(this, Observer { selectedAtm ->
-            mapManager.moveTo(selectedAtm)
-        })
     }
 
     private fun restoreInstanceState(savedInstanceState: Bundle?) {
@@ -61,19 +51,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun observeViewModelAtmData() {
-        atmViewModel.atmsLiveData.observe(this, Observer { atms ->
-            if (!atmViewModel.distancesCalculated) {
-                locationManager.calculateDistances(atms) { isSuccess ->
-                    if (isSuccess) {
-                        atmViewModel.distancesCalculated = true
-                        atmViewModel.atmsLiveData.value = atms
-                    }
-                    mapManager.addMarkers(atms)
-                }
-            } else {
-                mapManager.addMarkers(atms)
+    private fun observeRawViewModelAtmData() {
+        atmViewModel.atmsRawLiveData.observe(this, Observer { atms ->
+            locationManager.calculateDistances(atms) { atmsResult ->
+                atmViewModel.onDistancesCalculated(atmsResult)
             }
+        })
+    }
+
+    private fun observeFinalViewModelAtmData() {
+        atmViewModel.atmsFinalLiveData.observe(this, Observer { atms ->
+            mapManager.addMarkers(atms)
+        })
+    }
+
+    private fun observeViewModelSelectedAtm() {
+        atmViewModel.atmSelectedLiveData.observe(this, Observer { selectedAtm ->
+            mapManager.moveTo(selectedAtm)
         })
     }
 
@@ -122,4 +116,8 @@ class MainActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
     }
 
+    override fun onDestroy() {
+        locationManager.onDestroy()
+        super.onDestroy()
+    }
 }
