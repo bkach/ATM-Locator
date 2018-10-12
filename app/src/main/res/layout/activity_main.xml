@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MapActivity">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -17,10 +17,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/main_activity_fragment_container_1"
         app:layout_constraintHeight_percent="0.5"
-        tools:context=".MainActivity" />
+        tools:context=".MapActivity" />
 
     <fragment
-        android:name="com.example.boris.atmlocator.AtmListFragment"
+        android:name="com.example.boris.atmlocator.atmList.AtmListFragment"
         android:id="@+id/main_activity_fragment_container_1"
         android:layout_width="match_parent"
         android:layout_height="0dp"

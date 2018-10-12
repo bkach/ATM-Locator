@@ -10,7 +10,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.boris.atmlocator"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -40,12 +40,6 @@ dependencies {
     // Constraint Layout
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 
-    // Dagger
-    implementation 'com.google.dagger:dagger:2.17'
-    kapt 'com.google.dagger:dagger-compiler:2.17'
-    kaptAndroidTest 'com.google.dagger:dagger-compiler:2.17'
-    kaptTest 'com.google.dagger:dagger-compiler:2.17'
-
     // ViewModel, LiveData, and Lifecycles
     def lifecycle_version = "1.1.1"
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
@@ -53,7 +47,7 @@ dependencies {
     testImplementation "android.arch.core:core-testing:$lifecycle_version"
 
     // Mockito
-    testImplementation "org.mockito:mockito-core:2.19.0"
+    testImplementation "org.mockito:mockito-core:2.21.0"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0-RC1"
 
     // RecyclerView
@@ -69,10 +63,7 @@ dependencies {
     kapt "android.arch.persistence.room:compiler:$room_version" // use kapt for Kotlin
     testImplementation "android.arch.persistence.room:testing:$room_version"
 
-    // Picasso
-    implementation 'com.squareup.picasso:picasso:2.71828'
-
-    // Design support, for SnackBars
+    // Design support, for card views
     implementation 'com.android.support:design:28.0.0'
 
     // maps
@@ -86,4 +77,21 @@ dependencies {
 
     // RxAndroid
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+
+    // Koin
+    def koin_version = '1.0.1'
+    // Koin for Kotlin
+    implementation "org.koin:koin-core:$koin_version"
+    // Koin extended & experimental features
+    implementation "org.koin:koin-core-ext:$koin_version"
+    // Koin for Unit tests
+    testImplementation "org.koin:koin-test:$koin_version"
+    // Koin for Java developers
+    implementation "org.koin:koin-java:$koin_version"
+    // Koin for Android
+    implementation "org.koin:koin-android:$koin_version"
+    // Koin Android Scope feature
+    implementation "org.koin:koin-android-scope:$koin_version"
+    // Koin Android ViewModel feature
+    implementation "org.koin:koin-android-viewmodel:$koin_version"
 }

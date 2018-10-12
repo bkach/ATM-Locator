@@ -8,11 +8,11 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.example.boris.atmlocator.LocationManager.Companion.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.android.synthetic.main.fragment_atm_list.*
 
 
-class MainActivity : AppCompatActivity() {
+class MapActivity : AppCompatActivity() {
 
-    lateinit var component: MainComponent
     private val locationManager = LocationManager()
     private val mapManager = MapManager()
     lateinit var atmViewModel: AtmViewModel
@@ -20,11 +20,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        component = DaggerMainComponent.builder()
-                .mainModule(MainModule(this))
-                .build()
-
 
         atmViewModel = ViewModelProviders.of(this).get(AtmViewModel::class.java)
         initView()
@@ -54,7 +49,11 @@ class MainActivity : AppCompatActivity() {
     private fun observeRawViewModelAtmData() {
         atmViewModel.atmsRawLiveData.observe(this, Observer { atms ->
             locationManager.calculateDistances(atms) { atmsResult ->
-                atmViewModel.onDistancesCalculated(atmsResult)
+                if (atmsResult?.get(0)?.distance != null) {
+                    atmViewModel.distancesCalculated = true
+                }
+
+                atmViewModel.onDistancesCalculated(atmsResult!!)
             }
         })
     }
@@ -84,9 +83,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         mapManager.updateMapLocationUI(locationManager.locationPermissionGranted)
-        if (locationManager.locationPermissionGranted) {
-            moveMapToDeviceLocation()
-        }
     }
 
     private fun moveCameraToInitialPosition() {
@@ -104,8 +100,9 @@ class MainActivity : AppCompatActivity() {
                         LatLng(locationManager.lastKnownLocation.value!!.latitude,
                                locationManager.lastKnownLocation.value!!.longitude))
             } else {
-                Log.d("MainActivity", "Current location is null. Using defaults.")
-                Log.e("MainActivity", "Exception: %s", exception)
+                Log.d("MapActivity", "Current location is null. Using defaults.")
+                Log.e("MapActivity", "Exception: %s", exception)
+                mapManager.moveCameraToLocation(MapManager.DEFAULT_LOCATION)
             }
         }
     }

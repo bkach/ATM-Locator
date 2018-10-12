@@ -10,9 +10,10 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
+import com.example.boris.atmlocator.repository.Atm
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import io.reactivex.Observable
+import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -78,18 +79,23 @@ class LocationManager {
                         onLocationRetrieved(false, task.exception)
                     }
                 }
+            } else {
+                onLocationRetrieved(false, null)
             }
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message)
+            onLocationRetrieved(false, e)
         }
     }
 
     fun calculateDistances(atms: List<Atm>?, onDistancesCalculated: (List<Atm>?) -> Unit) {
-        if (lastKnownLocation.value != null) {
-            calculateDistanceInBackground(atms, onDistancesCalculated)
-        } else {
-            onDistancesCalculated(atms)
-            observeLocationChange(atms, onDistancesCalculated)
+        refreshLastKnownLocation { _, _ ->
+            if (lastKnownLocation.value != null) {
+                calculateDistanceInBackground(atms, onDistancesCalculated)
+            } else {
+                onDistancesCalculated(atms)
+                observeLocationChange(atms, onDistancesCalculated)
+            }
         }
     }
 
@@ -98,7 +104,7 @@ class LocationManager {
             if (location != null) {
                 calculateDistanceInBackground(atms) {
                     lastKnownLocation.removeObserver(lastKnownLocationObserver)
-                    onDistancesCalculated(atms)
+                    onDistancesCalculated(it)
                 }
             }
         }
@@ -106,21 +112,27 @@ class LocationManager {
     }
 
     private fun calculateDistanceInBackground(atms: List<Atm>?, onDistancesCalculated: (List<Atm>?) -> Unit) {
-        calculateDistancesDisposable = Observable.just(atms)
-                        .subscribeOn(Schedulers.computation())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .doOnNext {
-                            it?.map {
-                                distanceCalculationLocation.latitude = it.latitude
-                                distanceCalculationLocation.longitude = it.longitude
-                                it.distance = lastKnownLocation.value?.distanceTo(distanceCalculationLocation)
-                                it
-                            }
-                        }
-                        .subscribe {
-                            onDistancesCalculated(it)
-                        }
+        val atmsMutable = atms?.toMutableList()
+
+        calculateDistancesDisposable = Completable.fromAction {
+            atmsMutable?.map {
+                distanceCalculationLocation.latitude = it.latitude
+                distanceCalculationLocation.longitude = it.longitude
+                it.distance = lastKnownLocation.value?.distanceTo(distanceCalculationLocation)
+                it
+            }
+            if (atmsMutable?.get(0)?.distance != null) {
+                atmsMutable.sortBy { closest(it) }
+            }
+        }
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe {
+            onDistancesCalculated(atmsMutable)
+        }
     }
+
+    private fun closest(atm: Atm): Float = atm.distance!!
 
     fun onDestroy() {
         calculateDistancesDisposable?.dispose()

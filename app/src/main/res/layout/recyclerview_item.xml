@@ -31,16 +31,17 @@
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Monsanto Bank of the Future" />
+            tools:text="Monsanto the Future of the future" />
 
         <TextView
             android:id="@+id/view_holder_item_address"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="22dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@+id/view_holder_item_name"
             app:layout_constraintTop_toBottomOf="@+id/view_holder_item_name"
-            tools:text="Helmfeltsgatan 10, Malmo Sweden" />
+            tools:text="Helmfeltsgatan 10, Malmo Sweden and then some more " />
 
         <TextView
             android:id="@+id/view_holder_item_distance"
@@ -48,11 +49,26 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:textSize="10sp"
+            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/view_holder_item_name"
             app:layout_constraintTop_toBottomOf="@+id/view_holder_item_address"
             tools:text="400 Meteres Away" />
+
+        <TextView
+            android:id="@+id/view_holder_closest_view"
+            style="@style/TextAppearance.Design.Error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/closest"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view_holder_item_address"
+            tools:visibility="visible" />
 
     </android.support.constraint.ConstraintLayout>
 

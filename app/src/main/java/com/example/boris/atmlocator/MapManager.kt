@@ -1,11 +1,9 @@
 package com.example.boris.atmlocator
 
-import android.content.res.Resources
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
+import com.example.boris.atmlocator.repository.Atm
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -21,10 +19,12 @@ class MapManager : OnMapReadyCallback {
     private var map: GoogleMap? = null
     private lateinit var onMapInit: () -> Unit
     var lastCameraPosition : CameraPosition? = null
+    var markers: HashMap<Atm, Marker?> = HashMap()
 
     companion object {
         private val KEY_CAMERA_POSITION = "camera_position"
         const val DEFAULT_ZOOM = 15.0f
+        val DEFAULT_LOCATION: LatLng = LatLng(47.3782535, 8.5392280)
     }
 
     fun restoreInstanceState(savedInstanceState: Bundle?) {
@@ -72,8 +72,6 @@ class MapManager : OnMapReadyCallback {
         }
     }
 
-    var markers: HashMap<Atm, Marker?> = HashMap()
-
     fun addMarkers(atms: List<Atm>?) {
         map?.clear()
         markers.clear()
@@ -83,7 +81,6 @@ class MapManager : OnMapReadyCallback {
                     .position(LatLng(atm.latitude, atm.longitude))
                     .title(atm.name)
                     .snippet(atm.address.formatted))
-
         }
     }
 
