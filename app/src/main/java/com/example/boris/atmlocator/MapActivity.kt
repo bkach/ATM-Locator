@@ -4,11 +4,12 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.example.boris.atmlocator.LocationManager.Companion.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
+import com.example.boris.atmlocator.repository.Atm
 import com.google.android.gms.maps.model.LatLng
-import kotlinx.android.synthetic.main.fragment_atm_list.*
 
 
 class MapActivity : AppCompatActivity() {
@@ -48,12 +49,9 @@ class MapActivity : AppCompatActivity() {
 
     private fun observeRawViewModelAtmData() {
         atmViewModel.atmsRawLiveData.observe(this, Observer { atms ->
-            locationManager.calculateDistances(atms) { atmsResult ->
-                if (atmsResult?.get(0)?.distance != null) {
-                    atmViewModel.distancesCalculated = true
-                }
-
-                atmViewModel.onDistancesCalculated(atmsResult!!)
+            locationManager.calculateDistances(atms) { isDistanceCalculated, atmsResult ->
+                atmViewModel.distancesCalculated = isDistanceCalculated
+                atmViewModel.onDistancesCalculated(atmsResult)
             }
         })
     }
@@ -66,9 +64,21 @@ class MapActivity : AppCompatActivity() {
 
     private fun observeViewModelSelectedAtm() {
         atmViewModel.atmSelectedLiveData.observe(this, Observer { selectedAtm ->
-            mapManager.moveTo(selectedAtm)
+            launchDialog(selectedAtm) {
+                mapManager.moveTo(selectedAtm)
+            }
         })
     }
+
+    private fun launchDialog(selectedAtm: Atm?, onGoToMap: () -> Unit) {
+        val builder = AlertDialog.Builder(this)
+        builder.setMessage(getString(R.string.dialog_message, selectedAtm?.name))
+        builder.setPositiveButton(R.string.move_to_location) { _, _ -> onGoToMap() }
+        builder.setNegativeButton(R.string.cancel) { _, _ -> }
+        builder.setCancelable(true)
+        builder.create().show()
+    }
+
 
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>,
@@ -78,6 +88,7 @@ class MapActivity : AppCompatActivity() {
             PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     locationManager.onLocationPermissionResult(true)
+                    atmViewModel.onLocationPermissionAccepted()
                 }
             }
         }

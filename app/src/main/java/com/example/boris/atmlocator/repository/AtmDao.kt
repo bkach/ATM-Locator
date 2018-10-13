@@ -6,6 +6,9 @@ import android.arch.persistence.room.Insert
 import android.arch.persistence.room.OnConflictStrategy.REPLACE
 import android.arch.persistence.room.Query
 
+/**
+ * Room Data Access Object used to communicate with the Room database
+ */
 @Dao
 interface AtmDao {
     @Insert(onConflict = REPLACE)

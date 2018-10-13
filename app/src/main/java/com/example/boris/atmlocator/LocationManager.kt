@@ -74,7 +74,11 @@ class LocationManager {
                 locationResult.addOnCompleteListener(activity) {task ->
                     if (task.isSuccessful) {
                         lastKnownLocation.value = task.result
-                        onLocationRetrieved(true, null)
+                        if (lastKnownLocation.value == null) {
+                            onLocationRetrieved(false, null)
+                        } else {
+                            onLocationRetrieved(true, null)
+                        }
                     } else {
                         onLocationRetrieved(false, task.exception)
                     }
@@ -88,30 +92,30 @@ class LocationManager {
         }
     }
 
-    fun calculateDistances(atms: List<Atm>?, onDistancesCalculated: (List<Atm>?) -> Unit) {
+    fun calculateDistances(atms: List<Atm>?, onDistancesCalculated: (Boolean, List<Atm>?) -> Unit) {
         refreshLastKnownLocation { _, _ ->
             if (lastKnownLocation.value != null) {
                 calculateDistanceInBackground(atms, onDistancesCalculated)
             } else {
-                onDistancesCalculated(atms)
+                onDistancesCalculated(false, atms)
                 observeLocationChange(atms, onDistancesCalculated)
             }
         }
     }
 
-    private fun observeLocationChange(atms: List<Atm>?, onDistancesCalculated: (List<Atm>?) -> Unit) {
+    private fun observeLocationChange(atms: List<Atm>?, onDistancesCalculated: (Boolean, List<Atm>?) -> Unit) {
         lastKnownLocationObserver = Observer { location ->
             if (location != null) {
-                calculateDistanceInBackground(atms) {
+                calculateDistanceInBackground(atms) { distanceCalculated, atms ->
                     lastKnownLocation.removeObserver(lastKnownLocationObserver)
-                    onDistancesCalculated(it)
+                    onDistancesCalculated(distanceCalculated, atms)
                 }
             }
         }
         lastKnownLocation.observeForever(lastKnownLocationObserver)
     }
 
-    private fun calculateDistanceInBackground(atms: List<Atm>?, onDistancesCalculated: (List<Atm>?) -> Unit) {
+    private fun calculateDistanceInBackground(atms: List<Atm>?, onDistancesCalculated: (Boolean, List<Atm>?) -> Unit) {
         val atmsMutable = atms?.toMutableList()
 
         calculateDistancesDisposable = Completable.fromAction {
@@ -128,7 +132,7 @@ class LocationManager {
         .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe {
-            onDistancesCalculated(atmsMutable)
+            onDistancesCalculated(true, atmsMutable)
         }
     }
 

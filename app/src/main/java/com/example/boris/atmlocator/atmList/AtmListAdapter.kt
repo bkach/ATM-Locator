@@ -8,10 +8,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.example.boris.atmlocator.AtmViewModel
 import com.example.boris.atmlocator.R
 import com.example.boris.atmlocator.repository.Atm
 
-class AtmListAdapter(val resources: Resources) : RecyclerView.Adapter<AtmListAdapter.ViewHolder>() {
+/**
+ * A List Adapter for the ATM List Recycler View.
+ *
+ * This class is responsible for managing the Recycler View and filling each View Holder
+ */
+class AtmListAdapter(private val resources: Resources, private val atmViewModel: AtmViewModel)
+    : RecyclerView.Adapter<AtmListAdapter.ViewHolder>() {
 
     var atms: List<Atm>? = listOf()
     val onClickCallback: MutableLiveData<Atm> = MutableLiveData()
@@ -30,10 +37,23 @@ class AtmListAdapter(val resources: Resources) : RecyclerView.Adapter<AtmListAda
         holder.atm = atms!![position]
         holder.atmNameTextView.text = holder.atm.name
         holder.atmAddressTextView.text = holder.atm.address.formatted
-        if (holder.atm.distance != null) {
-            holder.atmDistanceTextView.text = resources.getQuantityString(
-                    R.plurals.numberOfMeters, holder.atm.distance!!.toInt(), holder.atm.distance!!.toInt())
-            if (position == 0) {
+        setDistanceCalculatedFields(holder, position)
+        setItemSelectedClickListener(holder)
+    }
+
+    private fun setItemSelectedClickListener(holder: ViewHolder) {
+        holder.clickListener(View.OnClickListener {
+            onClickCallback.value = holder.atm
+        })
+    }
+
+    private fun setDistanceCalculatedFields(holder: ViewHolder, position: Int) {
+        val isFirstItem = position == 0
+
+        if (atmViewModel.distancesCalculated) {
+            holder.atmDistanceTextView.text = getDistanceText(holder.atm.distance!!.toInt())
+
+            if (isFirstItem) {
                 holder.closestView.visibility = View.VISIBLE
             } else {
                 holder.closestView.visibility = View.GONE
@@ -41,11 +61,10 @@ class AtmListAdapter(val resources: Resources) : RecyclerView.Adapter<AtmListAda
         } else {
             holder.closestView.visibility = View.GONE
         }
+    }
 
-        // Callback for RecyclerView item click
-        holder.clickListener(View.OnClickListener {
-            onClickCallback.value = holder.atm
-        })
+    private fun getDistanceText(distance: Int): String {
+        return resources.getQuantityString(R.plurals.numberOfMeters, distance, distance)
     }
 
     fun updateAtms(atms: List<Atm>?) {

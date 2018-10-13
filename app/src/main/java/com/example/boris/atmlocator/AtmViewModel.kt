@@ -3,6 +3,7 @@ package com.example.boris.atmlocator
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.util.Log
+import com.example.boris.atmlocator.externalUtil.SingleLiveEvent
 import com.example.boris.atmlocator.repository.Atm
 import com.example.boris.atmlocator.repository.AtmRepository
 import com.example.boris.atmlocator.repository.Resource
@@ -10,14 +11,14 @@ import org.koin.java.standalone.KoinJavaComponent.inject
 
 class AtmViewModel : ViewModel() {
 
-    // Live data containing ATM data from server
+    // Live atmsLiveData containing ATM atmsLiveData from server
     val atmsRawLiveData: MutableLiveData<List<Atm>> = MutableLiveData()
 
-    // Live data containing final ATM data, including distance
+    // Live atmsLiveData containing final ATM atmsLiveData, including distance
     val atmsFinalLiveData: MutableLiveData<List<Atm>> = MutableLiveData()
 
     // Which ATM was selected
-    val atmSelectedLiveData: MutableLiveData<Atm> = MutableLiveData()
+    val atmSelectedLiveData: SingleLiveEvent<Atm> = SingleLiveEvent()
     var distancesCalculated: Boolean = false
 
     val isLoading: MutableLiveData<Boolean> = MutableLiveData()
@@ -57,10 +58,17 @@ class AtmViewModel : ViewModel() {
         atmSelectedLiveData.value = atm
     }
 
-    fun onDistancesCalculated(atms: List<Atm>) {
+    fun onDistancesCalculated(atms: List<Atm>?) {
         // Sorting on backgroudnd thread!
-        Log.d("bdebug", "Distance Calculated...." + atms[0].distance)
-        atmsFinalLiveData.value = atms
+        Log.d("bdebug", "Distance Calculated....$atms")
+        if (atms != null) {
+            atmsFinalLiveData.value = atms
+        }
+    }
+
+    fun onLocationPermissionAccepted() {
+        // Re-initiate raw subscription
+        atmsRawLiveData.value = atmsRawLiveData.value
     }
 
 }

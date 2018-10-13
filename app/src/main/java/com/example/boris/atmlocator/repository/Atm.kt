@@ -4,6 +4,9 @@ import android.arch.persistence.room.Embedded
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 
+/**
+ * Data class for an ATM used to store the atmsLiveData in a Room database
+ */
 @Entity
 data class Atm(
         @PrimaryKey(autoGenerate = true) var id: Long?,
