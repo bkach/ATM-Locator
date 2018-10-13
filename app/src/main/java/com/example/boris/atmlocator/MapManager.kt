@@ -13,13 +13,12 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 
-
 class MapManager : OnMapReadyCallback {
 
     private var map: GoogleMap? = null
     private lateinit var onMapInit: () -> Unit
     var lastCameraPosition : CameraPosition? = null
-    var markers: HashMap<Atm, Marker?> = HashMap()
+    private var markers: HashMap<Atm, Marker?> = HashMap()
 
     companion object {
         private val KEY_CAMERA_POSITION = "camera_position"

@@ -3,72 +3,84 @@ package com.example.boris.atmlocator
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.util.Log
-import com.example.boris.atmlocator.externalUtil.SingleLiveEvent
 import com.example.boris.atmlocator.repository.Atm
 import com.example.boris.atmlocator.repository.AtmRepository
 import com.example.boris.atmlocator.repository.Resource
-import org.koin.java.standalone.KoinJavaComponent.inject
+import com.example.boris.atmlocator.util.BackgroundTaskRunner
+import com.example.boris.atmlocator.util.SingleLiveEvent
+import org.koin.standalone.KoinComponent
+import org.koin.standalone.inject
 
-class AtmViewModel : ViewModel() {
+/**
+ * View Model containing LiveData objects which are subscribed to by the views, namely the [MapActivity]
+ * and the [com.example.boris.atmlocator.atmList.AtmListFragment]
+ */
+class AtmViewModel : ViewModel(), KoinComponent {
 
-    // Live atmsLiveData containing ATM atmsLiveData from server
+    // Atm list retrieved from the server. This contains no distance information
     val atmsRawLiveData: MutableLiveData<List<Atm>> = MutableLiveData()
 
-    // Live atmsLiveData containing final ATM atmsLiveData, including distance
+    // Atm list retrieved from the view, once distance has been processed
     val atmsFinalLiveData: MutableLiveData<List<Atm>> = MutableLiveData()
 
-    // Which ATM was selected
+    // Selected Atm. Only emits once, not once on subscribe.
     val atmSelectedLiveData: SingleLiveEvent<Atm> = SingleLiveEvent()
+
     var distancesCalculated: Boolean = false
 
     val isLoading: MutableLiveData<Boolean> = MutableLiveData()
 
-    private val atmRepository: AtmRepository by inject(AtmRepository::class.java)
+    private val atmRepository: AtmRepository by inject()
+    private val backgroundTaskRunner: BackgroundTaskRunner
+            by inject(name = AtmApplication.VIEW_MODEL_LIFECYCLE_NAME)
 
     init {
         loadAtms()
     }
 
+    /**
+     * Loads a list of ATMs from the repository and populates the [isLoading] LiveData and calls
+     * the [onSuccess] function if succeeded
+     */
     private fun loadAtms() {
         atmRepository.loadAtms()
                 .observeForever { resource ->
                     when {
                         resource?.status == Resource.Status.SUCCESS && resource.data != null -> {
-                            isLoading.value = false
                             onSuccess(resource.data!!)
                         }
 
                         resource?.status == Resource.Status.LOADING -> isLoading.value = true
 
-                        else -> {
-                            isLoading.value = false
-                            Log.d("bdebug", "error " + resource?.message)
-                        }
+                        // TODO: Handle if there is an error in the repository!
+                        else -> { isLoading.value = false }
                     }
                 }
     }
 
     private fun onSuccess(atms: List<Atm>) {
-        Log.d("bdebug", "Loaded from repository")
         atmsRawLiveData.value = atms
     }
 
     fun onAtmSelected(atm: Atm?) {
-        Log.d("bdebug", "Selected")
         atmSelectedLiveData.value = atm
     }
 
     fun onDistancesCalculated(atms: List<Atm>?) {
-        // Sorting on backgroudnd thread!
-        Log.d("bdebug", "Distance Calculated....$atms")
+        isLoading.value = false
         if (atms != null) {
             atmsFinalLiveData.value = atms
         }
     }
 
     fun onLocationPermissionAccepted() {
-        // Re-initiate raw subscription
+        Log.d("bdebug", "location permission accepted")
         atmsRawLiveData.value = atmsRawLiveData.value
+    }
+
+    override fun onCleared() {
+        backgroundTaskRunner.dispose()
+        super.onCleared()
     }
 
 }

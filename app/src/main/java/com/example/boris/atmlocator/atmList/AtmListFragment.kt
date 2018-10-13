@@ -24,7 +24,8 @@ class AtmListFragment : Fragment() {
     private var atmListAdapter: AtmListAdapter? = null
     private lateinit var atmViewModel: AtmViewModel
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_atm_list, container, false)
     }
 
@@ -50,6 +51,10 @@ class AtmListFragment : Fragment() {
     private fun setAtmViewModel() {
         atmViewModel = ViewModelProviders.of(activity!!).get(AtmViewModel::class.java)
         setupRecyclerView()
+        observeAtmsList()
+    }
+
+    private fun observeAtmsList() {
         atmViewModel.atmsFinalLiveData.observe(this, Observer { atmListAdapter?.updateAtms(it) })
     }
 
@@ -58,7 +63,6 @@ class AtmListFragment : Fragment() {
             atmViewModel.onAtmSelected(atm)
         })
     }
-
 
     private fun setupRecyclerView() {
         if (atmListAdapter == null) {

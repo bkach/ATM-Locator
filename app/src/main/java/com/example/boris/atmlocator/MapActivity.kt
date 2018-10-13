@@ -9,14 +9,18 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.example.boris.atmlocator.LocationManager.Companion.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
 import com.example.boris.atmlocator.repository.Atm
+import com.example.boris.atmlocator.util.BackgroundTaskRunner
 import com.google.android.gms.maps.model.LatLng
-
+import org.koin.android.ext.android.inject
 
 class MapActivity : AppCompatActivity() {
 
     private val locationManager = LocationManager()
     private val mapManager = MapManager()
-    lateinit var atmViewModel: AtmViewModel
+    private lateinit var atmViewModel: AtmViewModel
+
+    private val backgroundTaskRunner: BackgroundTaskRunner
+            by inject(name = AtmApplication.ACTIVITY_LIFECYCLE_NAME)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +41,7 @@ class MapActivity : AppCompatActivity() {
             observeRawViewModelAtmData()
             observeFinalViewModelAtmData()
             observeViewModelSelectedAtm()
+            // TODO: Location changes? What should the behavior be when the location is turned on and off?
         }
     }
 
@@ -49,8 +54,9 @@ class MapActivity : AppCompatActivity() {
 
     private fun observeRawViewModelAtmData() {
         atmViewModel.atmsRawLiveData.observe(this, Observer { atms ->
-            locationManager.calculateDistances(atms) { isDistanceCalculated, atmsResult ->
+            locationManager.calculateAndSortAtmsByDistance(atms) { isDistanceCalculated, atmsResult ->
                 atmViewModel.distancesCalculated = isDistanceCalculated
+                // TODO: If distance not calculated, hide distance?
                 atmViewModel.onDistancesCalculated(atmsResult)
             }
         })
@@ -79,16 +85,18 @@ class MapActivity : AppCompatActivity() {
         builder.create().show()
     }
 
-
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>,
                                             grantResults: IntArray) {
         locationManager.onLocationPermissionResult(false)
+        Log.d("bdebug", "request permission result")
         when (requestCode) {
             PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.isNotEmpty() && grantResults[0]
+                        == PackageManager.PERMISSION_GRANTED) {
                     locationManager.onLocationPermissionResult(true)
                     atmViewModel.onLocationPermissionAccepted()
+                    moveMapToDeviceLocation()
                 }
             }
         }
@@ -111,8 +119,6 @@ class MapActivity : AppCompatActivity() {
                         LatLng(locationManager.lastKnownLocation.value!!.latitude,
                                locationManager.lastKnownLocation.value!!.longitude))
             } else {
-                Log.d("MapActivity", "Current location is null. Using defaults.")
-                Log.e("MapActivity", "Exception: %s", exception)
                 mapManager.moveCameraToLocation(MapManager.DEFAULT_LOCATION)
             }
         }
@@ -125,7 +131,8 @@ class MapActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        locationManager.onDestroy()
+        backgroundTaskRunner.dispose()
         super.onDestroy()
     }
+
 }

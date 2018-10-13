@@ -2,7 +2,7 @@
     <string name="app_name">ATM Locator</string>
     <string name="title_activity_maps">Map</string>
     <string name="closest">\u2605 Closest</string>
-    <string name="dialog_message">Welcome To %s</string>
+    <string name="dialog_message">Welcome to %s</string>
     <string name="move_to_location">Move to location</string>
     <string name="cancel">Cancel</string>
 </resources>

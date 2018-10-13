@@ -6,7 +6,7 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/atm_list_recyclerview"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/atm_list_item_top_margin"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

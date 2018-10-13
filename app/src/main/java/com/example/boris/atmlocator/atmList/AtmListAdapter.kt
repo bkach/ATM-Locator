@@ -2,7 +2,6 @@ package com.example.boris.atmlocator.atmList
 
 import android.arch.lifecycle.MutableLiveData
 import android.content.res.Resources
-import android.opengl.Visibility
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -60,6 +59,7 @@ class AtmListAdapter(private val resources: Resources, private val atmViewModel:
             }
         } else {
             holder.closestView.visibility = View.GONE
+            holder.atmDistanceTextView.text = ""
         }
     }
 
