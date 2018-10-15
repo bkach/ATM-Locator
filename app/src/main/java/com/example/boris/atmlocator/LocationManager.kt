@@ -15,15 +15,20 @@ import com.example.boris.atmlocator.util.DistanceCalculator
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
+/**
+ * Class used to control and inform the rest of the app about Location.
+ *
+ * Includes functionality for permissions, current location, and distance
+ */
 class LocationManager {
 
     private lateinit var activity: Activity
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-
     // Emits the last known location, even if location is currently unavailable
     val lastKnownLocation : MutableLiveData<Location?> = MutableLiveData()
-    lateinit var lastKnownLocationObserver: Observer<Location?>
+    private lateinit var lastKnownLocationObserver: Observer<Location?>
+
     private val distanceCalculator = DistanceCalculator()
     var locationPermissionGranted: Boolean = false
             private set
@@ -86,7 +91,7 @@ class LocationManager {
                 onLocationRetrieved(false, null)
             }
         } catch (e: SecurityException) {
-            Log.e("Exception: %s", e.message)
+            Log.e("Refresh Last Known Location Exception: %s", e.message)
             onLocationRetrieved(false, e)
         }
     }

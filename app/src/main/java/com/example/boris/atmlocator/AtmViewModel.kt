@@ -2,7 +2,6 @@ package com.example.boris.atmlocator
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
-import android.util.Log
 import com.example.boris.atmlocator.repository.Atm
 import com.example.boris.atmlocator.repository.AtmRepository
 import com.example.boris.atmlocator.repository.Resource
@@ -25,6 +24,8 @@ class AtmViewModel : ViewModel(), KoinComponent {
 
     // Selected Atm. Only emits once, not once on subscribe.
     val atmSelectedLiveData: SingleLiveEvent<Atm> = SingleLiveEvent()
+    val dismissError: SingleLiveEvent<Void> = SingleLiveEvent()
+    val setError: SingleLiveEvent<Void> = SingleLiveEvent()
 
     var distancesCalculated: Boolean = false
 
@@ -47,13 +48,20 @@ class AtmViewModel : ViewModel(), KoinComponent {
                 .observeForever { resource ->
                     when {
                         resource?.status == Resource.Status.SUCCESS && resource.data != null -> {
+                            dismissError.call()
                             onSuccess(resource.data!!)
                         }
 
-                        resource?.status == Resource.Status.LOADING -> isLoading.value = true
+                        resource?.status == Resource.Status.LOADING -> {
+                            dismissError.call()
+                            isLoading.value = true
+                        }
 
                         // TODO: Handle if there is an error in the repository!
-                        else -> { isLoading.value = false }
+                        else -> {
+                            setError.call()
+                            isLoading.value = false
+                        }
                     }
                 }
     }
@@ -74,7 +82,6 @@ class AtmViewModel : ViewModel(), KoinComponent {
     }
 
     fun onLocationPermissionAccepted() {
-        Log.d("bdebug", "location permission accepted")
         atmsRawLiveData.value = atmsRawLiveData.value
     }
 

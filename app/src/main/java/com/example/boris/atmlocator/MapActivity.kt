@@ -4,15 +4,25 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.design.widget.Snackbar
+import android.support.design.widget.Snackbar.LENGTH_INDEFINITE
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import com.example.boris.atmlocator.LocationManager.Companion.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
 import com.example.boris.atmlocator.repository.Atm
 import com.example.boris.atmlocator.util.BackgroundTaskRunner
+import com.google.android.gms.maps.MapFragment
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.ext.android.inject
 
+/**
+ * Main Activity in the app. Its main responsibilities are:
+ *
+ * - Communicating with and observing the [AtmViewModel]
+ * - Communicating with the [LocationManager]
+ * - Communicating with the [MapManager] which contains the map in the class' [MapFragment]
+ */
 class MapActivity : AppCompatActivity() {
 
     private val locationManager = LocationManager()
@@ -41,6 +51,7 @@ class MapActivity : AppCompatActivity() {
             observeRawViewModelAtmData()
             observeFinalViewModelAtmData()
             observeViewModelSelectedAtm()
+            observeErrors()
             // TODO: Location changes? What should the behavior be when the location is turned on and off?
         }
     }
@@ -76,6 +87,23 @@ class MapActivity : AppCompatActivity() {
         })
     }
 
+    var snackbar: Snackbar? = null
+
+    private fun observeErrors() {
+        atmViewModel.setError.observe(this, Observer {
+            showError()
+        })
+
+        atmViewModel.dismissError.observe(this, Observer {
+            snackbar?.dismiss()
+        })
+    }
+
+    private fun showError() {
+        snackbar = Snackbar.make(activity_parent_constraint_layout, "Error getting data, please try again later", LENGTH_INDEFINITE)
+        snackbar?.show()
+    }
+
     private fun launchDialog(selectedAtm: Atm?, onGoToMap: () -> Unit) {
         val builder = AlertDialog.Builder(this)
         builder.setMessage(getString(R.string.dialog_message, selectedAtm?.name))
@@ -89,7 +117,6 @@ class MapActivity : AppCompatActivity() {
                                             permissions: Array<String>,
                                             grantResults: IntArray) {
         locationManager.onLocationPermissionResult(false)
-        Log.d("bdebug", "request permission result")
         when (requestCode) {
             PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0]
@@ -132,6 +159,7 @@ class MapActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         backgroundTaskRunner.dispose()
+        mapManager.clearMarkers()
         super.onDestroy()
     }
 

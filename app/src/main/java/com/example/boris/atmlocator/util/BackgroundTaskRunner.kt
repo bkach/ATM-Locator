@@ -14,10 +14,10 @@ import io.reactivex.schedulers.Schedulers
  * It is the responsibility of those using this class to ensure that all disposables are properly
  * disposed, otherwise this could cause a memory leak
  */
-class BackgroundTaskRunner {
+open class BackgroundTaskRunner {
     private val disposables: CompositeDisposable = CompositeDisposable()
 
-    fun run(backgroundTask: () -> Unit, mainThreadTask: () -> Unit) {
+    open fun run(backgroundTask: () -> Unit, mainThreadTask: () -> Unit) {
         disposables.add(Completable.fromAction { backgroundTask() }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

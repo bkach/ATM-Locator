@@ -38,6 +38,12 @@ class AtmListFragment : Fragment() {
         disableManualRefresh()
     }
 
+    private fun setAtmViewModel() {
+        atmViewModel = ViewModelProviders.of(activity!!).get(AtmViewModel::class.java)
+        setupRecyclerView()
+        observeAtmsList()
+    }
+
     private fun disableManualRefresh() {
         (view as SwipeRefreshLayout).isEnabled = false
     }
@@ -46,12 +52,6 @@ class AtmListFragment : Fragment() {
         atmViewModel.isLoading.observe(this, Observer { isLoading ->
             (view as SwipeRefreshLayout).isRefreshing = isLoading!!
         })
-    }
-
-    private fun setAtmViewModel() {
-        atmViewModel = ViewModelProviders.of(activity!!).get(AtmViewModel::class.java)
-        setupRecyclerView()
-        observeAtmsList()
     }
 
     private fun observeAtmsList() {

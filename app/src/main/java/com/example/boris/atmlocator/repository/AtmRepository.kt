@@ -10,8 +10,6 @@ import org.koin.standalone.inject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 /**
  * Repository used to retrieve ATM atmsLiveData from either a Room database or the Network
@@ -23,23 +21,18 @@ class AtmRepository : KoinComponent {
     // Final live data which emits the atm list
     val atmsLiveData: MutableLiveData<Resource<List<Atm>>> = MutableLiveData()
 
+    // A Database factory is injected because it uses context, something which would not be be ideal in a mocked class
     private val atmDatabaseFactory: AtmDatabaseFactory by inject()
+    private val backgroundTaskRunner: BackgroundTaskRunner by inject(name = AtmApplication.VIEW_MODEL_LIFECYCLE_NAME)
+    private val atmRetrofitService: AtmService by inject()
+
     private val atmDatabase: AtmDatabase = atmDatabaseFactory.getDatabase()
     private lateinit var databaseObserver: Observer<List<Atm>>
-    private val backgroundTaskRunner: BackgroundTaskRunner by inject(name = AtmApplication.VIEW_MODEL_LIFECYCLE_NAME)
-    private val atmRetrofitService: AtmService
 
 
     companion object {
         // TODO: Ideally, this would be stored in a more secure way
         const val ATM_URL: String = "http://207.154.210.145:8080/"
-    }
-
-    init {
-        atmRetrofitService = Retrofit.Builder()
-                .baseUrl(ATM_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build().create<AtmService>(AtmService::class.java)
     }
 
     fun loadAtms(): LiveData<Resource<List<Atm>>> {

@@ -13,6 +13,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 
+/**
+ * Controls a given [GoogleMap] and informs the rest of the app about the [GoogleMap]s state
+ */
 class MapManager : OnMapReadyCallback {
 
     private var map: GoogleMap? = null
@@ -92,4 +95,8 @@ class MapManager : OnMapReadyCallback {
         }
     }
 
+    fun clearMarkers() {
+        map = null
+        markers.clear()
+    }
 }
