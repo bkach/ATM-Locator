@@ -1,6 +1,6 @@
 # ATM Locator
 
-An app which shows a list of ATMs closest to the users' location
+An app which shows a list of Swiss ATMs closest to the users' location
 
 <img src="screenshot.png" alt="screenshot" width="300" />
 
@@ -14,23 +14,25 @@ Some edge cases are covered (user rejects location, network not found, etc.) but
 
 ## Built With
 
-* [Kotlin](https://kotlinlang.org/) - The language used in the project
-* [Lifecycle](https://developer.android.com/topic/libraries/architecture/lifecycle) - Used with LiveData in order to attach data to the activity/fragment lifecycle
-* [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) - Used to make data be Lifecycle aware, and helps persist data through the activity Lifecycle 
-* [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) - Lifecycle aware model, which is used to create controllers that are attached to a given activity/fragment
-* [Mockito](https://site.mockito.org/) - Used for mocking and injecting mock classes in tests
-* [RecyclerView](https://developer.android.com/reference/android/support/v7/widget/RecyclerView) - Used to display the list of ATMs
-* [Retrofit](https://square.github.io/retrofit/) - Used to simplify networking
-* [Room](https://developer.android.com/topic/libraries/architecture/room) - Used for persistance in a SQLite database
-* [Android Design Support Library](https://developer.android.com/topic/libraries/support-library/packages) - Used for the snackbar, which shows errors
-* [ConstraintLayout](https://developer.android.com/reference/android/support/constraint/ConstraintLayout) - Layout used to provide complex UIs with a minimal view hierarchy
-* [Koin](https://github.com/InsertKoinIO/koin) - Used for dependency injection
-* [Mockito-Kotlin](https://github.com/nhaarman/mockito-kotlin/wiki) - A library used to make mockito more "kotlin-aware". Used primarily to be able to pass null objects into Mockito mocks.
+* [Kotlin](https://kotlinlang.org/)
+* [Lifecycle](https://developer.android.com/topic/libraries/architecture/lifecycle)
+* [LiveData](https://developer.android.com/topic/libraries/architecture/livedata)
+* [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel)
+* [Mockito](https://site.mockito.org/)
+* [RecyclerView](https://developer.android.com/reference/android/support/v7/widget/RecyclerView)
+* [Retrofit](https://square.github.io/retrofit/)
+* [Room](https://developer.android.com/topic/libraries/architecture/room)
+* [Android Design Support Library](https://developer.android.com/topic/libraries/support-library/packages)
+* [ConstraintLayout](https://developer.android.com/reference/android/support/constraint/ConstraintLayout)
+* [Koin](https://github.com/InsertKoinIO/koin)
+* [Mockito-Kotlin](https://github.com/nhaarman/mockito-kotlin/wiki)
 
-## Contributors
+## License
 
-This app was written by:
+ ![](app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png)
 
-	Boris Kachscovsky
-	kachscovsky@gmail.com
-	+46764281780
+Copyright (C) 2018 Boris Kachscovsky
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
